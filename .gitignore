@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+dist/
+sdk/src/meshllm/_generated/*.dylib
+sdk/src/meshllm/_generated/*.so
+sdk/src/meshllm/_generated/*.dll
