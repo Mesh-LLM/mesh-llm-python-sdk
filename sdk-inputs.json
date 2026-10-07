@@ -8,6 +8,7 @@
     "bridge": "explicit-prebuilt-input"
   },
   "files": {
+    ".gitattributes": "39258a68fd18572c01bcac0f7efdb01ef96654e2fb77047d52bc34f2357e9627",
     ".gitignore": "42a23bcda0a62f7cf3c15f9c50e59be2ad842408dd587ceab91ca62e69b3ed30",
     "LICENSE": "44459b86c2e96fdbfd8a6b5c33d30d4b04b5293fcb2ec96fe4dcc4e0f90b8962",
     "README.md": "c2fa0a0320b791553d7b473937d121e9792571271491d2c14e27646d1e9a3335",
