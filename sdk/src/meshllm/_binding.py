@@ -10,7 +10,9 @@ def native() -> ModuleType | object:
     """Load the generated binding only when a native-backed API is used."""
     global _native_module
     if _native_module is None:
-        _native_module = import_module("meshllm._generated.mesh_ffi")
+        module = import_module("meshllm._generated.mesh_ffi")
+        module._uniffi_check_api_checksums(module._UniffiLib)
+        _native_module = module
     return _native_module
 
 

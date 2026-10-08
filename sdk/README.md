@@ -29,3 +29,24 @@ This is an optional language-component command, separate from generic
 `just ci-validate`. It does not replace or qualify the four retained external
 SDK clients, their required smoke/release or explicit embedding-workload
 cadence, or real platform/model compatibility.
+
+## Native bridge bindings
+
+Generate bindings from the exact prebuilt Mesh FFI library using UniFFI 0.32.0.
+The source checkout supplies the matching UDL and crate metadata. The library
+supplies the exported Rust metadata and API checksums; UDL-only generation
+can produce incompatible checksums for Mesh's combined UDL/proc-macro surface.
+
+```bash
+sdk/scripts/generate-python-bindings.sh /absolute/mesh-source /absolute/uniffi-bindgen /absolute/libmeshllm_ffi.dylib
+sdk/scripts/build-native.sh /absolute/libmeshllm_ffi.dylib
+python3 -I -B sdk/tests/test_binding.py
+```
+
+Use the matching `.so` or `.dll` on other platforms. The SDK-owned lazy loader
+checks every generated API checksum before caching the native module. Generated
+UniFFI output is preserved apart from trailing whitespace normalization.
+The component tests above use mock handles; the binding tests require the real
+sibling bridge and test checksum refusal and native version readback without
+constructing a node or starting services. Neither test suite qualifies model
+serving or a published wheel.

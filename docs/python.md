@@ -23,4 +23,4 @@ owner identity is required. The old in-memory keypair hex constructor and
 
 Streaming is available through `node.inference.stream_chat_completions(...)`
 and `stream_responses(...)`; each event carries the original SSE data and raw
-frame. See [native runtime guidance](../SDK.md#native-runtime-artifacts).
+frame. See [native runtime guidance](https://github.com/Mesh-LLM/mesh-llm/blob/20444d0fe80edac46584ef5a2f065c1044ea4aaf/mesh/docs/SDK.md#native-runtime-artifacts).

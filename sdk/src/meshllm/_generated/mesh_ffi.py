@@ -555,35 +555,35 @@ def _uniffi_check_contract_api_version(lib):
         raise InternalError("UniFFI contract version mismatch: try cleaning and rebuilding your project")
 
 def _uniffi_check_api_checksums(lib):
-    if lib.uniffi_meshllm_ffi_checksum_func_create_node() != 63700:
+    if lib.uniffi_meshllm_ffi_checksum_func_create_node() != 7741:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_func_current_mesh_version() != 41756:
+    if lib.uniffi_meshllm_ffi_checksum_func_current_mesh_version() != 50997:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_func_current_skippy_abi_version() != 53670:
+    if lib.uniffi_meshllm_ffi_checksum_func_current_skippy_abi_version() != 63557:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_func_install_native_runtime() != 48746:
+    if lib.uniffi_meshllm_ffi_checksum_func_install_native_runtime() != 10411:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_func_installed_native_runtimes() != 16961:
+    if lib.uniffi_meshllm_ffi_checksum_func_installed_native_runtimes() != 6385:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_func_prune_native_runtimes() != 11380:
+    if lib.uniffi_meshllm_ffi_checksum_func_prune_native_runtimes() != 43279:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_func_remove_native_runtime() != 54339:
+    if lib.uniffi_meshllm_ffi_checksum_func_remove_native_runtime() != 6828:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_cancel() != 47545:
+    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_cancel() != 153:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_inference_list_models() != 41613:
+    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_inference_list_models() != 32986:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_join_token() != 57356:
+    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_join_token() != 55229:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_openai_request() != 19585:
+    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_openai_request() != 65095:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_openai_stream() != 40368:
+    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_openai_stream() != 24624:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_start() != 46124:
+    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_start() != 16152:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_status() != 42366:
+    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_status() != 3924:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_stop() != 10537:
+    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_stop() != 25964:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
 
 # A ctypes library to expose the extern-C FFI definitions.
@@ -1451,36 +1451,132 @@ _UniffiTempFfiError = FfiError
 class FfiError:  # type: ignore
 
     class BuildFailed(_UniffiTempFfiError):
+
+        def __init__(self, *values):
+            if len(values) != 1:
+                raise TypeError(f"Expected 1 arguments, found {len(values)}")
+            if not isinstance(values[0], str):
+                raise TypeError(f"unexpected type for tuple element 0 - expected 'str', got '{type(values[0])}'")
+            super().__init__(", ".join(map(repr, values)))
+            self._values = values
+
+        def __getitem__(self, index):
+            return self._values[index]
+
         def __repr__(self):
-            return "FfiError.BuildFailed({})".format(repr(str(self)))
+            return "FfiError.BuildFailed({})".format(str(self))
     _UniffiTempFfiError.BuildFailed = BuildFailed # type: ignore
     class JoinFailed(_UniffiTempFfiError):
+
+        def __init__(self, *values):
+            if len(values) != 1:
+                raise TypeError(f"Expected 1 arguments, found {len(values)}")
+            if not isinstance(values[0], str):
+                raise TypeError(f"unexpected type for tuple element 0 - expected 'str', got '{type(values[0])}'")
+            super().__init__(", ".join(map(repr, values)))
+            self._values = values
+
+        def __getitem__(self, index):
+            return self._values[index]
+
         def __repr__(self):
-            return "FfiError.JoinFailed({})".format(repr(str(self)))
+            return "FfiError.JoinFailed({})".format(str(self))
     _UniffiTempFfiError.JoinFailed = JoinFailed # type: ignore
     class DiscoveryFailed(_UniffiTempFfiError):
+
+        def __init__(self, *values):
+            if len(values) != 1:
+                raise TypeError(f"Expected 1 arguments, found {len(values)}")
+            if not isinstance(values[0], str):
+                raise TypeError(f"unexpected type for tuple element 0 - expected 'str', got '{type(values[0])}'")
+            super().__init__(", ".join(map(repr, values)))
+            self._values = values
+
+        def __getitem__(self, index):
+            return self._values[index]
+
         def __repr__(self):
-            return "FfiError.DiscoveryFailed({})".format(repr(str(self)))
+            return "FfiError.DiscoveryFailed({})".format(str(self))
     _UniffiTempFfiError.DiscoveryFailed = DiscoveryFailed # type: ignore
     class StreamFailed(_UniffiTempFfiError):
+
+        def __init__(self, *values):
+            if len(values) != 1:
+                raise TypeError(f"Expected 1 arguments, found {len(values)}")
+            if not isinstance(values[0], str):
+                raise TypeError(f"unexpected type for tuple element 0 - expected 'str', got '{type(values[0])}'")
+            super().__init__(", ".join(map(repr, values)))
+            self._values = values
+
+        def __getitem__(self, index):
+            return self._values[index]
+
         def __repr__(self):
-            return "FfiError.StreamFailed({})".format(repr(str(self)))
+            return "FfiError.StreamFailed({})".format(str(self))
     _UniffiTempFfiError.StreamFailed = StreamFailed # type: ignore
     class HostUnavailable(_UniffiTempFfiError):
+
+        def __init__(self, *values):
+            if len(values) != 1:
+                raise TypeError(f"Expected 1 arguments, found {len(values)}")
+            if not isinstance(values[0], str):
+                raise TypeError(f"unexpected type for tuple element 0 - expected 'str', got '{type(values[0])}'")
+            super().__init__(", ".join(map(repr, values)))
+            self._values = values
+
+        def __getitem__(self, index):
+            return self._values[index]
+
         def __repr__(self):
-            return "FfiError.HostUnavailable({})".format(repr(str(self)))
+            return "FfiError.HostUnavailable({})".format(str(self))
     _UniffiTempFfiError.HostUnavailable = HostUnavailable # type: ignore
     class ServingUnsupported(_UniffiTempFfiError):
+
+        def __init__(self, *values):
+            if len(values) != 1:
+                raise TypeError(f"Expected 1 arguments, found {len(values)}")
+            if not isinstance(values[0], str):
+                raise TypeError(f"unexpected type for tuple element 0 - expected 'str', got '{type(values[0])}'")
+            super().__init__(", ".join(map(repr, values)))
+            self._values = values
+
+        def __getitem__(self, index):
+            return self._values[index]
+
         def __repr__(self):
-            return "FfiError.ServingUnsupported({})".format(repr(str(self)))
+            return "FfiError.ServingUnsupported({})".format(str(self))
     _UniffiTempFfiError.ServingUnsupported = ServingUnsupported # type: ignore
     class NativeRuntimeFailed(_UniffiTempFfiError):
+
+        def __init__(self, *values):
+            if len(values) != 1:
+                raise TypeError(f"Expected 1 arguments, found {len(values)}")
+            if not isinstance(values[0], str):
+                raise TypeError(f"unexpected type for tuple element 0 - expected 'str', got '{type(values[0])}'")
+            super().__init__(", ".join(map(repr, values)))
+            self._values = values
+
+        def __getitem__(self, index):
+            return self._values[index]
+
         def __repr__(self):
-            return "FfiError.NativeRuntimeFailed({})".format(repr(str(self)))
+            return "FfiError.NativeRuntimeFailed({})".format(str(self))
     _UniffiTempFfiError.NativeRuntimeFailed = NativeRuntimeFailed # type: ignore
     class OpenAiRequestFailed(_UniffiTempFfiError):
+
+        def __init__(self, *values):
+            if len(values) != 1:
+                raise TypeError(f"Expected 1 arguments, found {len(values)}")
+            if not isinstance(values[0], str):
+                raise TypeError(f"unexpected type for tuple element 0 - expected 'str', got '{type(values[0])}'")
+            super().__init__(", ".join(map(repr, values)))
+            self._values = values
+
+        def __getitem__(self, index):
+            return self._values[index]
+
         def __repr__(self):
-            return "FfiError.OpenAiRequestFailed({})".format(repr(str(self)))
+            return "FfiError.OpenAiRequestFailed({})".format(str(self))
     _UniffiTempFfiError.OpenAiRequestFailed = OpenAiRequestFailed # type: ignore
 
 FfiError = _UniffiTempFfiError # type: ignore
@@ -1528,40 +1624,56 @@ class _UniffiFfiConverterTypeFfiError(_UniffiConverterRustBuffer):
     @staticmethod
     def check_lower(value):
         if isinstance(value, FfiError.BuildFailed):
+            _UniffiFfiConverterString.check_lower(value._values[0])
             return
         if isinstance(value, FfiError.JoinFailed):
+            _UniffiFfiConverterString.check_lower(value._values[0])
             return
         if isinstance(value, FfiError.DiscoveryFailed):
+            _UniffiFfiConverterString.check_lower(value._values[0])
             return
         if isinstance(value, FfiError.StreamFailed):
+            _UniffiFfiConverterString.check_lower(value._values[0])
             return
         if isinstance(value, FfiError.HostUnavailable):
+            _UniffiFfiConverterString.check_lower(value._values[0])
             return
         if isinstance(value, FfiError.ServingUnsupported):
+            _UniffiFfiConverterString.check_lower(value._values[0])
             return
         if isinstance(value, FfiError.NativeRuntimeFailed):
+            _UniffiFfiConverterString.check_lower(value._values[0])
             return
         if isinstance(value, FfiError.OpenAiRequestFailed):
+            _UniffiFfiConverterString.check_lower(value._values[0])
             return
 
     @staticmethod
     def write(value, buf):
         if isinstance(value, FfiError.BuildFailed):
             buf.write_i32(1)
+            _UniffiFfiConverterString.write(value._values[0], buf)
         if isinstance(value, FfiError.JoinFailed):
             buf.write_i32(2)
+            _UniffiFfiConverterString.write(value._values[0], buf)
         if isinstance(value, FfiError.DiscoveryFailed):
             buf.write_i32(3)
+            _UniffiFfiConverterString.write(value._values[0], buf)
         if isinstance(value, FfiError.StreamFailed):
             buf.write_i32(4)
+            _UniffiFfiConverterString.write(value._values[0], buf)
         if isinstance(value, FfiError.HostUnavailable):
             buf.write_i32(5)
+            _UniffiFfiConverterString.write(value._values[0], buf)
         if isinstance(value, FfiError.ServingUnsupported):
             buf.write_i32(6)
+            _UniffiFfiConverterString.write(value._values[0], buf)
         if isinstance(value, FfiError.NativeRuntimeFailed):
             buf.write_i32(7)
+            _UniffiFfiConverterString.write(value._values[0], buf)
         if isinstance(value, FfiError.OpenAiRequestFailed):
             buf.write_i32(8)
+            _UniffiFfiConverterString.write(value._values[0], buf)
 
 
 
