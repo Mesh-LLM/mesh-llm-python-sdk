@@ -1,5 +1,38 @@
 # Python SDK
 
+## Model discovery and OCR
+
+`node.models` lists every workload advertised in the joined mesh, including
+local and remote OCR, speech, embedding and decision providers. The existing
+`node.inference.list_models()` list contains only compatible LLM offerings.
+
+```python
+from pathlib import Path
+from meshllm import DocumentOcrOptions
+
+page = await node.models.list(workload_class="document_ocr", available=True)
+model = await node.models.get(page.data[0].id)
+response = await node.inference.document_ocr(
+    Path("scan.pdf").read_bytes(),
+    DocumentOcrOptions(model=model.id, filename="scan.pdf",
+                       content_type="application/pdf", response_format="markdown"),
+)
+print(response.body)
+```
+
+Lists return a typed page with `data` and `next_cursor`. Keep filters unchanged
+when continuing; expired snapshot cursors require restarting the list. Provider
+runtime limits and observations remain separate. Missing metadata is unknown.
+OCR preserves JSON/text/Markdown provider responses; non-success statuses raise
+by default. Use `raise_for_status=False` for an explicit raw response.
+
+Membership controls, live transcription, native runtime management and the
+full native `Node.from_config` constructor have the same capabilities as the
+other four SDKs. See the [package guide](../sdk/README.md) for complete examples,
+cleanup and matching native bridge requirements.
+
+## Create an embedded node
+
 The Python package exposes one `Node` with `client`, `serve`, and `combined`
 roles. `serve` is serve-only; inference methods reject that role.
 
