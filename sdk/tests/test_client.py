@@ -66,7 +66,26 @@ class FakeHandle:
         )
 
     def inference_list_models(self) -> list[object]:
-        return [SimpleNamespace(id="model-a", name="Model A", context_length=131_072)]
+        return [
+            SimpleNamespace(
+                id="model-a",
+                name="Model A",
+                context_length=131_072,
+                thinking_efforts=["low", "high"],
+            ),
+            SimpleNamespace(
+                id="model-b",
+                name="Model B",
+                context_length=None,
+                thinking_efforts=None,
+            ),
+            SimpleNamespace(
+                id="model-c",
+                name="Model C",
+                context_length=None,
+                thinking_efforts=[],
+            ),
+        ]
 
     def openai_request(self, path: str, body_json: str) -> object:
         body = json.loads(body_json)
@@ -145,11 +164,21 @@ class NodeTests(unittest.IsolatedAsyncioTestCase):
 
         async with client:
             self.assertTrue((await client.status()).running)
-            model = (await client.inference.list_models())[0]
-            self.assertEqual(model.id, "model-a")
-            self.assertEqual(model.context_length, 131_072)
+            models = await client.inference.list_models()
+            self.assertEqual(models[0].id, "model-a")
+            self.assertEqual(models[0].context_length, 131_072)
 
         self.assertFalse(handle.started)
+
+    async def test_list_models_keeps_effort_states_distinct(self) -> None:
+        handle = FakeHandle()
+        client = Node(handle)
+
+        models = await client.inference.list_models()
+
+        self.assertEqual(models[0].thinking_efforts, ("low", "high"))
+        self.assertIsNone(models[1].thinking_efforts)
+        self.assertEqual(models[2].thinking_efforts, ())
 
     async def test_agent_request_preserves_tools_and_full_response(self) -> None:
         handle = FakeHandle()

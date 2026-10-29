@@ -952,24 +952,75 @@ class _UniffiFfiConverterOptionalUInt32(_UniffiConverterRustBuffer):
         else:
             raise InternalError("Unexpected flag byte for optional type")
 
+class _UniffiFfiConverterSequenceString(_UniffiConverterRustBuffer):
+    @classmethod
+    def check_lower(cls, value):
+        for item in value:
+            _UniffiFfiConverterString.check_lower(item)
+
+    @classmethod
+    def write(cls, value, buf):
+        items = len(value)
+        buf.write_i32(items)
+        for item in value:
+            _UniffiFfiConverterString.write(item, buf)
+
+    @classmethod
+    def read(cls, buf):
+        count = buf.read_i32()
+        if count < 0:
+            raise InternalError("Unexpected negative sequence length")
+
+        return [
+            _UniffiFfiConverterString.read(buf) for i in range(count)
+        ]
+
+class _UniffiFfiConverterOptionalSequenceString(_UniffiConverterRustBuffer):
+    @classmethod
+    def check_lower(cls, value):
+        if value is not None:
+            _UniffiFfiConverterSequenceString.check_lower(value)
+
+    @classmethod
+    def write(cls, value, buf):
+        if value is None:
+            buf.write_u8(0)
+            return
+
+        buf.write_u8(1)
+        _UniffiFfiConverterSequenceString.write(value, buf)
+
+    @classmethod
+    def read(cls, buf):
+        flag = buf.read_u8()
+        if flag == 0:
+            return None
+        elif flag == 1:
+            return _UniffiFfiConverterSequenceString.read(buf)
+        else:
+            raise InternalError("Unexpected flag byte for optional type")
+
 @dataclass
 class ModelNative:
-    def __init__(self, *, id:str, name:str, context_length:typing.Optional[int]):
+    def __init__(self, *, id:str, name:str, context_length:typing.Optional[int], thinking_efforts:typing.Optional[typing.List[str]]):
         self.id = id
         self.name = name
         self.context_length = context_length
+        self.thinking_efforts = thinking_efforts
 
 
 
 
     def __str__(self):
-        return "ModelNative(id={}, name={}, context_length={})".format(self.id, self.name, self.context_length)
+        return "ModelNative(id={}, name={}, context_length={}, thinking_efforts={})".format(self.id, self.name, self.context_length, self.thinking_efforts)
     def __eq__(self, other):
         if self.id != other.id:
             return False
         if self.name != other.name:
             return False
         if self.context_length != other.context_length:
+            return False
+        if self.thinking_efforts != other.thinking_efforts:
             return False
         return True
 
@@ -980,6 +1031,7 @@ class _UniffiFfiConverterTypeModelNative(_UniffiConverterRustBuffer):
             id=_UniffiFfiConverterString.read(buf),
             name=_UniffiFfiConverterString.read(buf),
             context_length=_UniffiFfiConverterOptionalUInt32.read(buf),
+            thinking_efforts=_UniffiFfiConverterOptionalSequenceString.read(buf),
         )
 
     @staticmethod
@@ -987,12 +1039,14 @@ class _UniffiFfiConverterTypeModelNative(_UniffiConverterRustBuffer):
         _UniffiFfiConverterString.check_lower(value.id)
         _UniffiFfiConverterString.check_lower(value.name)
         _UniffiFfiConverterOptionalUInt32.check_lower(value.context_length)
+        _UniffiFfiConverterOptionalSequenceString.check_lower(value.thinking_efforts)
 
     @staticmethod
     def write(value, buf):
         _UniffiFfiConverterString.write(value.id, buf)
         _UniffiFfiConverterString.write(value.name, buf)
         _UniffiFfiConverterOptionalUInt32.write(value.context_length, buf)
+        _UniffiFfiConverterOptionalSequenceString.write(value.thinking_efforts, buf)
 
 class _UniffiFfiConverterUInt64(_UniffiConverterPrimitiveInt):
     CLASS_NAME = "u64"
@@ -1106,29 +1160,6 @@ class _UniffiFfiConverterTypeNativeRuntimeDownloadProgressNative(_UniffiConverte
         _UniffiFfiConverterUInt64.write(value.downloaded_bytes, buf)
         _UniffiFfiConverterOptionalUInt64.write(value.total_bytes, buf)
         _UniffiFfiConverterBoolean.write(value.finished, buf)
-
-class _UniffiFfiConverterSequenceString(_UniffiConverterRustBuffer):
-    @classmethod
-    def check_lower(cls, value):
-        for item in value:
-            _UniffiFfiConverterString.check_lower(item)
-
-    @classmethod
-    def write(cls, value, buf):
-        items = len(value)
-        buf.write_i32(items)
-        for item in value:
-            _UniffiFfiConverterString.write(item, buf)
-
-    @classmethod
-    def read(cls, buf):
-        count = buf.read_i32()
-        if count < 0:
-            raise InternalError("Unexpected negative sequence length")
-
-        return [
-            _UniffiFfiConverterString.read(buf) for i in range(count)
-        ]
 
 
 

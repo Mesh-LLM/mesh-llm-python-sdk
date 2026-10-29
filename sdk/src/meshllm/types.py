@@ -32,6 +32,10 @@ class Model:
     id: str
     name: str
     context_length: int | None = None
+    #: Reasoning effort levels the provider advertises for this serving ID.
+    #: ``None`` means unknown (an older provider or an unprobed model); an empty
+    #: tuple means the provider reports that this template has no effort levels.
+    thinking_efforts: tuple[str, ...] | None = None
 
 
 @dataclass(frozen=True, slots=True)

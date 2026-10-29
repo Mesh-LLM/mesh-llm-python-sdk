@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "repository": "Mesh-LLM/mesh-llm-python-sdk",
-  "mesh_source": "b66a42653",
+  "mesh_source": "e819fd4fe8d3d87517708faa0f2589c05aa48d80",
   "generator": {
     "uniffi": "0.32.0",
     "mode": "library-metadata",
@@ -20,7 +20,7 @@
     "ci/required-sdk-python/pyproject.toml": "50191adcecfd5e387d42d21b577cae76fa82d25c2627864021f8ada9c7de7cd7",
     "ci/required-sdk-python/requirements.lock": "e60a887ad0e8f353d0df5fc764dd00b663c8f766a246b33282e041ebf3d31ec6",
     "ci/required-sdk-python/uv.lock": "c83abb8b07ea1ab8f84267c87fd136182596c1bbb626321e1aff90783eeb00e6",
-    "docs/python.md": "32478a5b75854afb16a9a2519f7f3c319cdb5b19ce01608794edf2a815de9b7c",
+    "docs/python.md": "ec321cd7abe6173a268dacc58d68a69444a294f095d8a4a83cedc9f7595571de",
     "scripts/ci-langchain-openai-smoke.py": "1215b0e6c77a234dd5294cd5a5e90fda3937a2056d842360410f9fb2fad522f4",
     "scripts/ci-litellm-smoke.py": "c4df8c820a669beb227b16392402702079701bbdd538060824269ed703bb1cc8",
     "scripts/ci-openai-embeddings-smoke.py": "7640e3443baa7dfcef2e09fcf455d87543a29703dd7a394e16e160616d289ecc",
@@ -36,11 +36,11 @@
     "sdk/src/meshllm/_binding.py": "48ffbd34bd72bc3ac6ac7a7afafd092b54c76fd9dbf02081c2f7db3c8e648b33",
     "sdk/src/meshllm/_generated/.gitignore": "d1ed744637de88057038edbb22a0411c08f751390472304b747257687fb5dbe5",
     "sdk/src/meshllm/_generated/__init__.py": "eba30075c4d139a19472bcbe1195b1adfd94182b3ee5fd5131fc5865d49a918c",
-    "sdk/src/meshllm/_generated/mesh_ffi.py": "0694098a61700a52fcf5f9f7dd7dea8c5f8535345b0f7941ea4d326cf65b59c8",
-    "sdk/src/meshllm/client.py": "4cfc778c2632e05fc3ab2faf0d86e487d709624ba08b8f17f3bfc280febae2f9",
-    "sdk/src/meshllm/types.py": "083a107d2ab3d3f9521a9ac89d754a6c86fdc285ad999848590e218744ac0fae",
+    "sdk/src/meshllm/_generated/mesh_ffi.py": "0263fffaf814ddefb343ccfba09e6de4568e05d410d248dd893ff15c1e5b606b",
+    "sdk/src/meshllm/client.py": "788f0112644274901c3383d8e8cbab36da47bdf675cf326d002c1a776da6452a",
+    "sdk/src/meshllm/types.py": "43e80058ce8859341604cd8ea28fe3930895b1b975fac753e5e81e212322a967",
     "sdk/tests/test_binding.py": "81ba8f430d987675931049bda54efe4dce64c107d51db990713d066283d8ed19",
-    "sdk/tests/test_client.py": "0ee1ac10c367b84a0a31564a353068f96a3a19a4caaeffe3b59e27d733458f74",
+    "sdk/tests/test_client.py": "0a71c4832c9f9eee528744ad74e884072995dbeb8ced4fbae1e50c4dccbb318c",
     "sdk/uniffi.toml": "1bae43ad0481c024429b2fe21068231f4268f6c3f62e31134f2dbb1f72dfe68d"
   }
 }
