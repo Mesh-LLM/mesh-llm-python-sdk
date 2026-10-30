@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+import json
 import sys
 import unittest
 from types import SimpleNamespace
@@ -59,6 +60,35 @@ class BindingAdmissionTests(unittest.TestCase):
             with self.assertRaises(AttributeError):
                 _binding.native()
         self.assertIsNone(_binding._native_module)
+
+    def test_new_native_capabilities_reject_stopped_node_without_http(self) -> None:
+        module = _binding.native()
+        handle = module.create_node("client", [], [], False, None, 0, 0)
+        calls = [
+            lambda: handle.mesh_models_json("{}"),
+            lambda: handle.mesh_model_json("org/model#profile"),
+            lambda: handle.document_ocr(b"%PDF-1.7", '{"model":"ocr"}'),
+            lambda: handle.start_live_transcription_json("{}"),
+            lambda: handle.memberships_json(),
+            lambda: handle.remove_membership("team"),
+            lambda: handle.add_membership_json(json.dumps({
+                "name": "team", "join_tokens": [], "trusted_owners": [],
+                "api_port": 9338, "node_key_path": None, "enumerate_host": False,
+            })),
+        ]
+        for call in calls:
+            with self.subTest(method=call):
+                with self.assertRaises(module.FfiError.HostUnavailable):
+                    call()
+
+    def test_full_configuration_factory_matches_native_validation(self) -> None:
+        module = _binding.native()
+        node = module.create_node_config_json('{"mode":"client","network":{"auto_join":false}}')
+        self.assertFalse(node.status().running)
+        with self.assertRaises(module.FfiError.BuildFailed):
+            module.create_node_config_json('{"network":{"autoJoin":true}}')
+        with self.assertRaises(module.FfiError.BuildFailed):
+            module.create_node_config_json('{"http":{"api_port":70000}}')
 
 
 if __name__ == "__main__":

@@ -6,6 +6,10 @@ from collections.abc import AsyncIterator, Mapping
 from typing import Any
 
 from ._binding import native
+from .models import Models
+from .memberships import MeshMembershipConfig, MeshMembershipStatus
+from .documents import DocumentOcrOptions
+from .live_transcription import LiveTranscription, LiveTranscriptionOptions
 from .types import (
     Model,
     OpenAIRequestError,
@@ -66,6 +70,27 @@ class Inference:
             )
             for model in models
         ]
+
+    async def document_ocr(
+        self, file: bytes, options: DocumentOcrOptions, *, raise_for_status: bool = True
+    ) -> OpenAIResponse:
+        """Submit PDF/image bytes to an advertised OCR model.
+
+        The provider's JSON, text or Markdown body and status are preserved.
+        This uses the mesh document endpoint, not chat completions.
+        """
+        response = await asyncio.to_thread(
+            self._handle.document_ocr, file,
+            json.dumps(options._wire(), separators=(",", ":")),
+        )
+        result = OpenAIResponse(
+            status_code=response.status_code,
+            content_type=response.content_type,
+            body=response.body,
+        )
+        if raise_for_status and not 200 <= result.status_code < 300:
+            raise OpenAIRequestError(result.status_code, result.body)
+        return result
 
     async def request(
         self,
@@ -189,6 +214,18 @@ class Node:
     def __init__(self, handle: object) -> None:
         self._handle = handle
         self.inference = Inference(handle)
+        self.models = Models(handle)
+
+    @classmethod
+    def from_config(cls, config: Mapping[str, Any]) -> Node:
+        """Use the complete native configuration, rejecting unknown fields.
+
+        Snake-case fields and defaults match Rust. Advanced settings are
+        forwarded intact through the same native startup validation.
+        """
+        return cls(native().create_node_config_json(
+            json.dumps(dict(config), separators=(",", ":")),
+        ))
 
     @classmethod
     def create(
@@ -231,6 +268,31 @@ class Node:
 
     async def join_token(self, token: str) -> None:
         await asyncio.to_thread(self._handle.join_token, token)
+
+    async def add_membership(self, config: MeshMembershipConfig) -> MeshMembershipStatus:
+        """Serve this node's models into another isolated mesh membership."""
+        payload = await asyncio.to_thread(
+            self._handle.add_membership_json,
+            json.dumps(config._wire(), separators=(",", ":")),
+        )
+        return MeshMembershipStatus._decode(json.loads(payload))
+
+    async def remove_membership(self, name: str) -> bool:
+        return await asyncio.to_thread(self._handle.remove_membership, name)
+
+    async def memberships(self) -> list[MeshMembershipStatus]:
+        payload = await asyncio.to_thread(self._handle.memberships_json)
+        return [MeshMembershipStatus._decode(item) for item in json.loads(payload)]
+
+    async def start_live_transcription(
+        self, options: LiveTranscriptionOptions | None = None
+    ) -> LiveTranscription:
+        options = options if options is not None else LiveTranscriptionOptions()
+        session = await asyncio.to_thread(
+            self._handle.start_live_transcription_json,
+            json.dumps(options._wire(), separators=(",", ":")),
+        )
+        return LiveTranscription(session)
 
     async def __aenter__(self) -> Node:
         await self.start()
