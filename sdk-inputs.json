@@ -27,7 +27,7 @@
     "scripts/ci-openai-python-smoke.py": "ae2e2ce989257a83d88a51e8ba14345206af2aa5f5be62e21d28b574f36024e4",
     "scripts/import-compatibility.py": "595a7cb19aab27cc55606d25bb231d20fb36b683fcfc4b423fb7d42ea23b6783",
     "scripts/import-embedding.py": "174d20b4c015a80fc9bdaabf3c658e68fdb99cf4053142bdf59ba331b8dc7f32",
-    "sdk/README.md": "15726cb82c2e51c7ea766f53edf49dbafb723e543aea54d89ff4f7baf00a02e8",
+    "sdk/README.md": "e7411fff4ce814b057bd4de82bf22e1788feb8c81590d96bb83e925e2dbfe3ed",
     "sdk/hatch_build.py": "7d8ac98389c67a42492003170f7433fa42544752dd064969615abd809998ebe4",
     "sdk/pyproject.toml": "a9094e8b257e579439467f2106f4868c03e557fdd593cab7949d2ebe46227443",
     "sdk/scripts/build-native.sh": "53abe51977d062ca26f73325cf20db7e5dd73c4993310d522fba1c2841a59e82",

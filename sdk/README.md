@@ -93,7 +93,7 @@ print(response.body)
 The response preserves provider status, content type and body. JSON responses
 also expose `.json()`. Non-success statuses raise `OpenAIRequestError` by default;
 pass `raise_for_status=False` to inspect a raw error response. OCR uses multipart
-`/v1/documents/ocr`, never chat completions. Empty files, files over 64 MiB and
+`/mesh/v1/documents/ocr`, never chat completions. Empty files, files over 64 MiB and
 invalid options are rejected by the native SDK.
 
 ## Additional mesh memberships
