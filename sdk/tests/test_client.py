@@ -290,6 +290,8 @@ class NodeTests(unittest.IsolatedAsyncioTestCase):
         ))
         self.assertEqual(calls[0]["sample_rate"], 48000)
         self.assertIsNone(calls[0]["turn_detection"])
+        self.assertIsNone(calls[0]["step_ms"])
+        self.assertFalse(calls[0]["tentative"])
         async with live:
             await live.send_audio((-32768, 0, 32767))
             await live.send_audio_f32((-1.0, 0.0, 1.0))
@@ -300,6 +302,37 @@ class NodeTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(remaining[0].transcript, "Hi!")
         self.assertIn(("pcm", [-32768, 0, 32767]), calls)
         self.assertIn(("float", [-1.0, 0.0, 1.0]), calls)
+        self.assertEqual(calls[-1], "close")
+
+    async def test_live_transcription_tentative_options_and_events(self) -> None:
+        calls = []
+        updates = iter(("hel", "hello", ""))
+
+        class Session:
+            def next_event_json(self):
+                return json.dumps({"type": "tentative", "item_id": "turn", "text": next(updates)})
+            def stop_json(self):
+                return json.dumps([{"type": "completed", "item_id": "turn", "transcript": "Hello!"}])
+            def close_audio(self): calls.append("close")
+
+        def start(options_json):
+            calls.append(json.loads(options_json))
+            return Session()
+
+        node = Node(SimpleNamespace(start_live_transcription_json=start))
+        live = await node.start_live_transcription(LiveTranscriptionOptions(
+            step_ms=400, tentative=True,
+        ))
+        self.assertEqual(calls[0]["step_ms"], 400)
+        self.assertTrue(calls[0]["tentative"])
+        self.assertNotIn("stepMs", calls[0])
+        async with live:
+            for expected in ("hel", "hello", ""):
+                event = await live.next_event()
+                self.assertEqual((event.type, event.item_id, event.text), ("tentative", "turn", expected))
+                self.assertIsNone(event.transcript)
+            remaining = await live.stop()
+            self.assertEqual((remaining[0].type, remaining[0].transcript), ("completed", "Hello!"))
         self.assertEqual(calls[-1], "close")
 
     async def test_mesh_discovery_preserves_ocr_and_provider_observations(self) -> None:
