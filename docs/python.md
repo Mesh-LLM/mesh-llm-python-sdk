@@ -55,6 +55,13 @@ empty text clears it. Append `delta` text to the confirmed transcript and let
 concurrently with microphone input. `stop()` finishes the turn and returns
 unread events; context exit closes the session, including on errors.
 
+Confirmed deltas are append-only. Recognition errors in confirmed text cannot
+be corrected by later passes or the completed event. Shorter transcription
+intervals do not guarantee better recognition accuracy.
+
+Native transcription failures end the session after an error event. Start a
+new session to retry. Request-validation errors may leave the session open.
+
 ## Create an embedded node
 
 The Python package exposes one `Node` with `client`, `serve`, and `combined`

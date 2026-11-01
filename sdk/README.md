@@ -139,6 +139,13 @@ turn and returns unread events; `close()` cancels. Context exit closes the
 session. Transcription uses the existing WebSocket inference transport; only
 the model catalog queries promise no HTTP dependency.
 
+Confirmed deltas are append-only. Recognition errors in confirmed text cannot
+be corrected by later passes or the completed event. Shorter transcription
+intervals do not guarantee better recognition accuracy.
+
+Native transcription failures end the session after an error event. Start a
+new session to retry. Request-validation errors may leave the session open.
+
 ## Native runtime management
 
 ```python
