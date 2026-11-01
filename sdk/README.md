@@ -118,6 +118,7 @@ from meshllm import LiveTranscriptionOptions
 
 live = await node.start_live_transcription(LiveTranscriptionOptions(
     model="whisper-model", sample_rate=48000, turn_detection=None,
+    step_ms=400, tentative=True,
 ))
 async with live:
     await live.send_audio(pcm16_samples)
@@ -128,7 +129,12 @@ async with live:
 
 Use signed 16-bit mono samples or `send_audio_f32` with float samples. Read events
 concurrently with microphone input through `next_event()` or `events()`. Deltas
-are confirmed text; completed events contain a full turn. `stop()` finishes the
+are confirmed text; completed events contain a full turn. `step_ms` accepts 200
+to 5000 ms; `None` keeps the node's 1000 ms default. Shorter steps run more
+transcription passes. `tentative` defaults to `False`. When enabled, each
+`tentative` event replaces the previous unconfirmed text for its `item_id`;
+empty text clears it. Append `delta` text to the confirmed transcript and let
+`completed` replace the whole turn, including any tentative text. `stop()` finishes the
 turn and returns unread events; `close()` cancels. Context exit closes the
 session. Transcription uses the existing WebSocket inference transport; only
 the model catalog queries promise no HTTP dependency.

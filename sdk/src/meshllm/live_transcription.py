@@ -23,6 +23,10 @@ class LiveTranscriptionOptions:
     prompt: str | None = None
     sample_rate: int = 16000
     turn_detection: LiveTurnDetection | None = field(default_factory=LiveTurnDetection)
+    # Audio between passes, 200 to 5000 ms. None keeps the node's 1000 ms default.
+    step_ms: int | None = None
+    # Report replaceable, unconfirmed text before confirmed deltas.
+    tentative: bool = False
 
     def _wire(self) -> dict[str, Any]:
         # Explicit null disables automatic turn detection (push to talk).
@@ -31,6 +35,11 @@ class LiveTranscriptionOptions:
 
 @dataclass(frozen=True, slots=True)
 class LiveTranscriptionEvent:
+    """Tentative text replaces the previous value for its turn; empty text clears it.
+
+    Completed supersedes tentative text. Delta text is confirmed and appended.
+    """
+
     type: str
     item_id: str | None = None
     text: str | None = None
@@ -50,7 +59,7 @@ class LiveTranscriptionEvent:
 
 
 class LiveTranscription:
-    """Send mono PCM samples and read confirmed transcript events concurrently.
+    """Send mono PCM samples and read transcript events concurrently.
 
     Call ``stop`` to finish the current turn and collect remaining events, or
     ``close`` to cancel. An async context manager closes the session on exit.

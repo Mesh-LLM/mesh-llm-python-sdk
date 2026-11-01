@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(pathlib.Path(__file__).parents[1] / "src"))
 from meshllm import _binding
+from meshllm import LiveTranscriptionOptions
 
 
 class BindingAdmissionTests(unittest.TestCase):
@@ -89,6 +90,15 @@ class BindingAdmissionTests(unittest.TestCase):
             module.create_node_config_json('{"network":{"autoJoin":true}}')
         with self.assertRaises(module.FfiError.BuildFailed):
             module.create_node_config_json('{"http":{"api_port":70000}}')
+
+    def test_incremental_transcription_options_reach_native_role_check(self) -> None:
+        module = _binding.native()
+        handle = module.create_node("client", [], [], False, None, 0, 0)
+        options = LiveTranscriptionOptions(step_ms=400, tentative=True)
+        with self.assertRaises(module.FfiError.HostUnavailable):
+            handle.start_live_transcription_json(json.dumps(options._wire()))
+        with self.assertRaises(module.FfiError.StreamFailed):
+            handle.start_live_transcription_json('{"stepMs":400,"tentative":true}')
 
 
 if __name__ == "__main__":
