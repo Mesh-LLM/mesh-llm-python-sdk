@@ -99,6 +99,10 @@ async def install_native_runtime(
     result = await asyncio.to_thread(
         binding.install_native_runtime, args, Progress() if on_progress is not None else None,
     )
+    if on_progress is not None:
+        # Since Python 3.13 the await can finish before queued progress callbacks run;
+        # one loop turn delivers them before the caller sees the outcome.
+        await asyncio.sleep(0)
     return NativeRuntimeInstallOutcome(
         result.status, InstalledNativeRuntime._decode(result.runtime),
         result.selected_native_runtime_id, result.selected_source,

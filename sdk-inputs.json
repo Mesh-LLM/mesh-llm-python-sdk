@@ -42,7 +42,7 @@
     "sdk/src/meshllm/live_transcription.py": "924f446fcefe50f6c448c7dd9f2a64276129f2d0036c692ad88d16d892e95997",
     "sdk/src/meshllm/memberships.py": "4529877036155b0d04e4e0c1aaae67001b9885edd07f6aec8f55244a061e0d62",
     "sdk/src/meshllm/models.py": "979b82455c15f26d065094353de571720866448607a0d4d91b4606c449780b2e",
-    "sdk/src/meshllm/native_runtime.py": "bea90f43e59446bf9feb412878e3eb37ba4b167b1d506d5dc9176cdce0f96810",
+    "sdk/src/meshllm/native_runtime.py": "ea5ecc5d1a1c2c113da7d50ed373dbd3861806f60a35b9cfbe67deac531e034a",
     "sdk/src/meshllm/types.py": "083a107d2ab3d3f9521a9ac89d754a6c86fdc285ad999848590e218744ac0fae",
     "sdk/tests/test_binding.py": "2165b36b9bb75bc9915ae78d0bcaf4d1c537adf39c563a24f68cc7e965d13821",
     "sdk/tests/test_client.py": "aebaec7f756c32de7aa3516edcc3a068eb0177bec295bb22bff4ddd4b8a3e022",
