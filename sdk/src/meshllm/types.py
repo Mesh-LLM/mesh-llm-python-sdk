@@ -32,6 +32,8 @@ class Model:
     id: str
     name: str
     context_length: int | None = None
+    #: None means unknown; an empty tuple means no advertised effort levels.
+    thinking_efforts: tuple[str, ...] | None = None
 
 
 @dataclass(frozen=True, slots=True)

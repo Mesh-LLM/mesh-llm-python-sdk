@@ -26,6 +26,22 @@ runtime limits and observations remain separate. Missing metadata is unknown.
 OCR preserves JSON/text/Markdown provider responses; non-success statuses raise
 by default. Use `raise_for_status=False` for an explicit raw response.
 
+`provider.metadata` preserves advertised output formats, independently of image
+or audio input capabilities:
+
+```python
+model = await node.models.get("org/model@revision#profile")
+for provider in model.providers:
+    outputs = (provider.metadata.get("output_modalities")
+               if provider.metadata is not None else None)
+    print(provider.provider_id, outputs)
+```
+
+Missing or empty `output_modalities` means unknown, never text-only. Future names
+are preserved. Read individual providers: model-level metadata is present only
+when providers agree. This declaration does not choose what a prompt generates
+or change routing. Use the matching SDK and native bridge together.
+
 Membership controls, live transcription, native runtime management and the
 full native `Node.from_config` constructor have the same capabilities as the
 other four SDKs. See the [package guide](../sdk/README.md) for complete examples,
@@ -88,3 +104,8 @@ owner identity is required. The old in-memory keypair hex constructor and
 Streaming is available through `node.inference.stream_chat_completions(...)`
 and `stream_responses(...)`; each event carries the original SSE data and raw
 frame. See [native runtime guidance](https://github.com/Mesh-LLM/mesh-llm/blob/20444d0fe80edac46584ef5a2f065c1044ea4aaf/mesh/docs/SDK.md#native-runtime-artifacts).
+
+`node.inference.list_models()` also preserves advertised `thinking_efforts` as a
+tuple of supported levels. `None` means unknown; an empty tuple means the model
+advertises no effort levels. Select an advertised level before setting
+`reasoning_effort` in a request.

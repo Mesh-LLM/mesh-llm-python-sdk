@@ -138,6 +138,21 @@ class FakeHandle:
 
 
 class NodeTests(unittest.IsolatedAsyncioTestCase):
+    async def test_list_models_keeps_advertised_effort_states_distinct(self) -> None:
+        handle = SimpleNamespace(inference_list_models=lambda: [
+            SimpleNamespace(id="levels", name="Levels", context_length=4096,
+                            thinking_efforts=["low", "high"]),
+            SimpleNamespace(id="unknown", name="Unknown", thinking_efforts=None),
+            SimpleNamespace(id="none", name="None", thinking_efforts=[]),
+            SimpleNamespace(id="legacy", name="Legacy"),
+        ])
+        models = await Node(handle).inference.list_models()
+        self.assertEqual(models[0].thinking_efforts, ("low", "high"))
+        self.assertEqual(models[0].context_length, 4096)
+        self.assertIsNone(models[1].thinking_efforts)
+        self.assertEqual(models[2].thinking_efforts, ())
+        self.assertIsNone(models[3].thinking_efforts)
+
     async def test_full_native_configuration_is_forwarded_without_losing_settings(self) -> None:
         calls = []
         handle = FakeHandle()
@@ -382,6 +397,55 @@ class NodeTests(unittest.IsolatedAsyncioTestCase):
         result = await node.models.get(model["id"])
         self.assertEqual(calls[1], model["id"])
         self.assertEqual(result, page.data[0])
+
+    async def test_mesh_discovery_preserves_output_modalities_in_list_and_lookup(self) -> None:
+        future = {"architecture": "future", "output_modalities": ["text", "image", "future"]}
+        for name, metadata, provider_metadata in [
+            ("missing", None, [None]),
+            ("empty metadata", {}, [{}]),
+            ("missing field", {"architecture": "future"}, [{"architecture": "future"}]),
+            ("empty modalities", {"output_modalities": []}, [{"output_modalities": []}]),
+            ("future modality", future, [future]),
+            ("distinct providers", None, [
+                {"output_modalities": ["text", "image"]},
+                {"output_modalities": ["text"]},
+            ]),
+        ]:
+            with self.subTest(case=name):
+                model = {
+                    "id": "org/model@revision#profile", "display_name": "Model",
+                    "kind": "model", "availability": "available", "operations": ["chat"],
+                    "providers": [],
+                }
+                if metadata is not None:
+                    model["metadata"] = metadata
+                for index, observations in enumerate(provider_metadata):
+                    provider = {"provider_id": f"peer-{index}", "local": False,
+                                "available": True, "operations": ["chat"]}
+                    if observations is not None:
+                        provider["metadata"] = observations
+                    model["providers"].append(provider)
+
+                def lookup(model_id):
+                    self.assertEqual(model_id, model["id"])
+                    return json.dumps(model)
+
+                # Rich discovery must not depend on the compatibility model list.
+                node = Node(SimpleNamespace(
+                    mesh_models_json=lambda _: json.dumps({"data": [model], "next_cursor": None}),
+                    mesh_model_json=lookup,
+                ))
+                page = await node.models.list()
+                self.assertEqual(len(page.data), 1)
+                found = await node.models.get(model["id"])
+                self.assertEqual(found, page.data[0])
+                self.assertEqual(found.metadata, metadata)
+                self.assertEqual([provider.metadata for provider in found.providers], provider_metadata)
+                if name == "future modality":
+                    self.assertEqual(found.providers[0].metadata["output_modalities"],
+                                     ["text", "image", "future"])
+                if name == "distinct providers":
+                    self.assertIsNone(found.metadata, "do not synthesize model-level agreement")
 
     async def test_mesh_discovery_defaults_empty_page_and_unknown_values(self) -> None:
         queries = []

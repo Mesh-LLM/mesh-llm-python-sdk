@@ -23,6 +23,16 @@ from .types import (
 _MAX_STREAM_EVENTS = 256
 
 
+def _model_from_native(model: object) -> Model:
+    efforts = getattr(model, "thinking_efforts", None)
+    return Model(
+        id=model.id,
+        name=model.name,
+        context_length=getattr(model, "context_length", None),
+        thinking_efforts=None if efforts is None else tuple(efforts),
+    )
+
+
 class _EventSink:
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self._loop = loop
@@ -62,14 +72,7 @@ class Inference:
 
     async def list_models(self) -> list[Model]:
         models = await asyncio.to_thread(self._handle.inference_list_models)
-        return [
-            Model(
-                id=model.id,
-                name=model.name,
-                context_length=getattr(model, "context_length", None),
-            )
-            for model in models
-        ]
+        return [_model_from_native(model) for model in models]
 
     async def document_ocr(
         self, file: bytes, options: DocumentOcrOptions, *, raise_for_status: bool = True
