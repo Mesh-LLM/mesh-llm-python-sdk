@@ -73,6 +73,34 @@ HTTP API. Discovery reflects observed advertisements, not a reservation or a
 download catalog. Use a native bridge generated from the matching Mesh release;
 older bridges do not expose these methods.
 
+`provider.metadata.get("output_modalities")` exposes declared output formats
+when metadata is present. Missing or empty values mean unknown, not text-only;
+future names are preserved. Providers keep separate declarations, and
+model-level metadata appears only when all providers agree. See the
+[usage guide](../docs/python.md) for an example. Output formats are independent
+of input capabilities and do not choose a model's response or change routing.
+
+With the matching staged native bridge, qualification can require a controlled
+remote provider advertising `["text", "image", "future"]`:
+
+```bash
+MESH_PYTHON_DISCOVERY_JOIN_FILE=/absolute/private-fixture.token \
+MESH_PYTHON_DISCOVERY_MODEL=controlled-model-id \
+python3 -I -B sdk/tests/test_native_discovery.py
+```
+
+Use an isolated Mesh profile for this fixture. The test reads the invite from
+the file and performs discovery only. It requires the named model and compares
+provider metadata through native list, native lookup, and HTTP; an empty catalog
+cannot qualify it. Set `MESH_PYTHON_DISCOVERY_OUTPUT_MODALITIES` to a JSON list
+to match another fixture declaration; it must include `"text"` and `"image"`.
+Without fixture inputs, this case is skipped while the existing native discovery
+smoke remains available. Supplying only one required input is an error.
+
+The compatibility `node.inference.list_models()` retains `thinking_efforts`:
+`None` means unknown, an empty tuple means no effort levels, and other tuples
+contain the advertised levels.
+
 ## OCR inference
 
 Discover `document_ocr` models, then submit PDF or image bytes directly:
