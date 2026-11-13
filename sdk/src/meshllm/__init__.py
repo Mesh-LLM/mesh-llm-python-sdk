@@ -21,6 +21,7 @@ from .types import (
     OpenAIStreamChunk,
     OpenAIStreamEvent,
     OpenAIStreamStarted,
+    LaneCapacity,
     Status,
 )
 
@@ -58,6 +59,7 @@ __all__ = [
     "OpenAIStreamChunk",
     "OpenAIStreamEvent",
     "OpenAIStreamStarted",
+    "LaneCapacity",
     "Status",
 ]
 

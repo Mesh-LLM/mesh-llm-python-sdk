@@ -35,6 +35,14 @@ class Model:
 
 
 @dataclass(frozen=True, slots=True)
+class LaneCapacity:
+    execution_lanes: int
+    context_tokens_per_lane: int
+    context_pool_tokens: int
+    captured_at_unix_ms: int
+
+
+@dataclass(frozen=True, slots=True)
 class Status:
     running: bool
     mode: str

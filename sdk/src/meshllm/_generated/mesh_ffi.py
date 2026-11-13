@@ -605,6 +605,8 @@ def _uniffi_check_api_checksums(lib):
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_remove_membership() != 60373:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_runtime_capacity() != 26263:
+        raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_start() != 16152:
         raise InternalError("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     if lib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_start_live_transcription_json() != 38423:
@@ -717,6 +719,9 @@ _UniffiLib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_openai_stream.resty
 _UniffiLib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_remove_membership.argtypes = (
 )
 _UniffiLib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_remove_membership.restype = ctypes.c_uint16
+_UniffiLib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_runtime_capacity.argtypes = (
+)
+_UniffiLib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_runtime_capacity.restype = ctypes.c_uint16
 _UniffiLib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_start.argtypes = (
 )
 _UniffiLib.uniffi_meshllm_ffi_checksum_method_meshnodehandle_start.restype = ctypes.c_uint16
@@ -878,6 +883,12 @@ _UniffiLib.uniffi_meshllm_ffi_fn_method_meshnodehandle_remove_membership.argtype
     ctypes.POINTER(_UniffiRustCallStatus),
 )
 _UniffiLib.uniffi_meshllm_ffi_fn_method_meshnodehandle_remove_membership.restype = ctypes.c_int8
+_UniffiLib.uniffi_meshllm_ffi_fn_method_meshnodehandle_runtime_capacity.argtypes = (
+    ctypes.c_uint64,
+    _UniffiRustBuffer,
+    ctypes.POINTER(_UniffiRustCallStatus),
+)
+_UniffiLib.uniffi_meshllm_ffi_fn_method_meshnodehandle_runtime_capacity.restype = _UniffiRustBuffer
 _UniffiLib.uniffi_meshllm_ffi_fn_method_meshnodehandle_start.argtypes = (
     ctypes.c_uint64,
     ctypes.POINTER(_UniffiRustCallStatus),
@@ -1111,24 +1122,75 @@ class _UniffiFfiConverterOptionalUInt32(_UniffiConverterRustBuffer):
         else:
             raise InternalError("Unexpected flag byte for optional type")
 
+class _UniffiFfiConverterSequenceString(_UniffiConverterRustBuffer):
+    @classmethod
+    def check_lower(cls, value):
+        for item in value:
+            _UniffiFfiConverterString.check_lower(item)
+
+    @classmethod
+    def write(cls, value, buf):
+        items = len(value)
+        buf.write_i32(items)
+        for item in value:
+            _UniffiFfiConverterString.write(item, buf)
+
+    @classmethod
+    def read(cls, buf):
+        count = buf.read_i32()
+        if count < 0:
+            raise InternalError("Unexpected negative sequence length")
+
+        return [
+            _UniffiFfiConverterString.read(buf) for i in range(count)
+        ]
+
+class _UniffiFfiConverterOptionalSequenceString(_UniffiConverterRustBuffer):
+    @classmethod
+    def check_lower(cls, value):
+        if value is not None:
+            _UniffiFfiConverterSequenceString.check_lower(value)
+
+    @classmethod
+    def write(cls, value, buf):
+        if value is None:
+            buf.write_u8(0)
+            return
+
+        buf.write_u8(1)
+        _UniffiFfiConverterSequenceString.write(value, buf)
+
+    @classmethod
+    def read(cls, buf):
+        flag = buf.read_u8()
+        if flag == 0:
+            return None
+        elif flag == 1:
+            return _UniffiFfiConverterSequenceString.read(buf)
+        else:
+            raise InternalError("Unexpected flag byte for optional type")
+
 @dataclass
 class ModelNative:
-    def __init__(self, *, id:str, name:str, context_length:typing.Optional[int]):
+    def __init__(self, *, id:str, name:str, context_length:typing.Optional[int], thinking_efforts:typing.Optional[typing.List[str]]):
         self.id = id
         self.name = name
         self.context_length = context_length
+        self.thinking_efforts = thinking_efforts
 
 
 
 
     def __str__(self):
-        return "ModelNative(id={}, name={}, context_length={})".format(self.id, self.name, self.context_length)
+        return "ModelNative(id={}, name={}, context_length={}, thinking_efforts={})".format(self.id, self.name, self.context_length, self.thinking_efforts)
     def __eq__(self, other):
         if self.id != other.id:
             return False
         if self.name != other.name:
             return False
         if self.context_length != other.context_length:
+            return False
+        if self.thinking_efforts != other.thinking_efforts:
             return False
         return True
 
@@ -1139,6 +1201,7 @@ class _UniffiFfiConverterTypeModelNative(_UniffiConverterRustBuffer):
             id=_UniffiFfiConverterString.read(buf),
             name=_UniffiFfiConverterString.read(buf),
             context_length=_UniffiFfiConverterOptionalUInt32.read(buf),
+            thinking_efforts=_UniffiFfiConverterOptionalSequenceString.read(buf),
         )
 
     @staticmethod
@@ -1146,12 +1209,14 @@ class _UniffiFfiConverterTypeModelNative(_UniffiConverterRustBuffer):
         _UniffiFfiConverterString.check_lower(value.id)
         _UniffiFfiConverterString.check_lower(value.name)
         _UniffiFfiConverterOptionalUInt32.check_lower(value.context_length)
+        _UniffiFfiConverterOptionalSequenceString.check_lower(value.thinking_efforts)
 
     @staticmethod
     def write(value, buf):
         _UniffiFfiConverterString.write(value.id, buf)
         _UniffiFfiConverterString.write(value.name, buf)
         _UniffiFfiConverterOptionalUInt32.write(value.context_length, buf)
+        _UniffiFfiConverterOptionalSequenceString.write(value.thinking_efforts, buf)
 
 class _UniffiFfiConverterUInt64(_UniffiConverterPrimitiveInt):
     CLASS_NAME = "u64"
@@ -1265,29 +1330,6 @@ class _UniffiFfiConverterTypeNativeRuntimeDownloadProgressNative(_UniffiConverte
         _UniffiFfiConverterUInt64.write(value.downloaded_bytes, buf)
         _UniffiFfiConverterOptionalUInt64.write(value.total_bytes, buf)
         _UniffiFfiConverterBoolean.write(value.finished, buf)
-
-class _UniffiFfiConverterSequenceString(_UniffiConverterRustBuffer):
-    @classmethod
-    def check_lower(cls, value):
-        for item in value:
-            _UniffiFfiConverterString.check_lower(item)
-
-    @classmethod
-    def write(cls, value, buf):
-        items = len(value)
-        buf.write_i32(items)
-        for item in value:
-            _UniffiFfiConverterString.write(item, buf)
-
-    @classmethod
-    def read(cls, buf):
-        count = buf.read_i32()
-        if count < 0:
-            raise InternalError("Unexpected negative sequence length")
-
-        return [
-            _UniffiFfiConverterString.read(buf) for i in range(count)
-        ]
 
 
 
@@ -1593,6 +1635,54 @@ class _UniffiFfiConverterTypeOpenAiResponseNative(_UniffiConverterRustBuffer):
         _UniffiFfiConverterUInt16.write(value.status_code, buf)
         _UniffiFfiConverterOptionalString.write(value.content_type, buf)
         _UniffiFfiConverterString.write(value.body, buf)
+
+@dataclass
+class RuntimeCapacityNative:
+    def __init__(self, *, execution_lanes:int, context_tokens_per_lane:int, context_pool_tokens:int, captured_at_unix_ms:int):
+        self.execution_lanes = execution_lanes
+        self.context_tokens_per_lane = context_tokens_per_lane
+        self.context_pool_tokens = context_pool_tokens
+        self.captured_at_unix_ms = captured_at_unix_ms
+
+
+
+
+    def __str__(self):
+        return "RuntimeCapacityNative(execution_lanes={}, context_tokens_per_lane={}, context_pool_tokens={}, captured_at_unix_ms={})".format(self.execution_lanes, self.context_tokens_per_lane, self.context_pool_tokens, self.captured_at_unix_ms)
+    def __eq__(self, other):
+        if self.execution_lanes != other.execution_lanes:
+            return False
+        if self.context_tokens_per_lane != other.context_tokens_per_lane:
+            return False
+        if self.context_pool_tokens != other.context_pool_tokens:
+            return False
+        if self.captured_at_unix_ms != other.captured_at_unix_ms:
+            return False
+        return True
+
+class _UniffiFfiConverterTypeRuntimeCapacityNative(_UniffiConverterRustBuffer):
+    @staticmethod
+    def read(buf):
+        return RuntimeCapacityNative(
+            execution_lanes=_UniffiFfiConverterUInt64.read(buf),
+            context_tokens_per_lane=_UniffiFfiConverterUInt64.read(buf),
+            context_pool_tokens=_UniffiFfiConverterUInt64.read(buf),
+            captured_at_unix_ms=_UniffiFfiConverterUInt64.read(buf),
+        )
+
+    @staticmethod
+    def check_lower(value):
+        _UniffiFfiConverterUInt64.check_lower(value.execution_lanes)
+        _UniffiFfiConverterUInt64.check_lower(value.context_tokens_per_lane)
+        _UniffiFfiConverterUInt64.check_lower(value.context_pool_tokens)
+        _UniffiFfiConverterUInt64.check_lower(value.captured_at_unix_ms)
+
+    @staticmethod
+    def write(value, buf):
+        _UniffiFfiConverterUInt64.write(value.execution_lanes, buf)
+        _UniffiFfiConverterUInt64.write(value.context_tokens_per_lane, buf)
+        _UniffiFfiConverterUInt64.write(value.context_pool_tokens, buf)
+        _UniffiFfiConverterUInt64.write(value.captured_at_unix_ms, buf)
 
 
 
@@ -2467,6 +2557,31 @@ class _UniffiTraitImplOpenAiStreamListenerImpl:
 # The _UniffiConverter which transforms the Callbacks in to Handles to pass to Rust.
 _UniffiFfiConverterTypeOpenAiStreamListener = _UniffiCallbackInterfaceFfiConverter()
 
+class _UniffiFfiConverterOptionalTypeRuntimeCapacityNative(_UniffiConverterRustBuffer):
+    @classmethod
+    def check_lower(cls, value):
+        if value is not None:
+            _UniffiFfiConverterTypeRuntimeCapacityNative.check_lower(value)
+
+    @classmethod
+    def write(cls, value, buf):
+        if value is None:
+            buf.write_u8(0)
+            return
+
+        buf.write_u8(1)
+        _UniffiFfiConverterTypeRuntimeCapacityNative.write(value, buf)
+
+    @classmethod
+    def read(cls, buf):
+        flag = buf.read_u8()
+        if flag == 0:
+            return None
+        elif flag == 1:
+            return _UniffiFfiConverterTypeRuntimeCapacityNative.read(buf)
+        else:
+            raise InternalError("Unexpected flag byte for optional type")
+
 
 class MeshNodeHandleProtocol(typing.Protocol):
 
@@ -2500,6 +2615,11 @@ class MeshNodeHandleProtocol(typing.Protocol):
     def openai_stream(self, path: str,body_json: str,listener: OpenAiStreamListener) -> str:
         raise NotImplementedError
     def remove_membership(self, name: str) -> bool:
+        raise NotImplementedError
+    def runtime_capacity(self, model: str) -> typing.Optional[RuntimeCapacityNative]:
+        """
+        Current local capacity for an exact serving ID; unavailable is not zero.
+"""
         raise NotImplementedError
     def start(self, ) -> None:
         raise NotImplementedError
@@ -2714,6 +2834,24 @@ class MeshNodeHandle(MeshNodeHandleProtocol):
         _uniffi_ffi_result = _uniffi_rust_call_with_error(
             _uniffi_error_converter,
             _UniffiLib.uniffi_meshllm_ffi_fn_method_meshnodehandle_remove_membership,
+            *_uniffi_lowered_args,
+        )
+        return _uniffi_lift_return(_uniffi_ffi_result)
+    def runtime_capacity(self, model: str) -> typing.Optional[RuntimeCapacityNative]:
+        """
+        Current local capacity for an exact serving ID; unavailable is not zero.
+"""
+
+        _UniffiFfiConverterString.check_lower(model)
+        _uniffi_lowered_args = (
+            self._uniffi_clone_handle(),
+            _UniffiFfiConverterString.lower(model),
+        )
+        _uniffi_lift_return = _UniffiFfiConverterOptionalTypeRuntimeCapacityNative.lift
+        _uniffi_error_converter = _UniffiFfiConverterTypeFfiError
+        _uniffi_ffi_result = _uniffi_rust_call_with_error(
+            _uniffi_error_converter,
+            _UniffiLib.uniffi_meshllm_ffi_fn_method_meshnodehandle_runtime_capacity,
             *_uniffi_lowered_args,
         )
         return _uniffi_lift_return(_uniffi_ffi_result)
@@ -3057,6 +3195,7 @@ __all__ = [
     "NativeRuntimePruneResultNative",
     "NodeStatusNative",
     "OpenAiResponseNative",
+    "RuntimeCapacityNative",
     "create_node",
     "create_node_config_json",
     "current_mesh_version",
