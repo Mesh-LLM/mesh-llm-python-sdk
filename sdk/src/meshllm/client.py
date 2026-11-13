@@ -17,6 +17,7 @@ from .types import (
     OpenAIStreamChunk,
     OpenAIStreamEvent,
     OpenAIStreamStarted,
+    LaneCapacity,
     Status,
 )
 
@@ -255,6 +256,18 @@ class Node:
 
     async def stop(self) -> None:
         await asyncio.to_thread(self._handle.stop)
+
+    async def runtime_capacity(self, model: str) -> LaneCapacity | None:
+        """Read the latest local lane observation for an exact serving ID."""
+        value = await asyncio.to_thread(self._handle.runtime_capacity, model)
+        if value is None:
+            return None
+        return LaneCapacity(
+            execution_lanes=value.execution_lanes,
+            context_tokens_per_lane=value.context_tokens_per_lane,
+            context_pool_tokens=value.context_pool_tokens,
+            captured_at_unix_ms=value.captured_at_unix_ms,
+        )
 
     async def status(self) -> Status:
         value = await asyncio.to_thread(self._handle.status)

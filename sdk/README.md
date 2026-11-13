@@ -177,3 +177,19 @@ This constructor preserves native defaults and rejects unknown fields. Native
 duration values use `{"secs": 30, "nanos": 0}`. `Node.create` remains the shorter
 constructor for common settings; full configuration does not introduce an
 alternate trust policy or bypass native startup validation.
+
+## Local runtime capacity
+
+For a started serving node, query an exact local serving ID:
+
+```python
+capacity = await node.runtime_capacity("exact-serving-id")
+if capacity is not None:
+    print(capacity.execution_lanes, capacity.context_tokens_per_lane,
+          capacity.context_pool_tokens, capacity.captured_at_unix_ms)
+```
+
+The result includes busy lanes and does not reserve resources. Unknown,
+unsupported, unavailable or incomplete capacity returns `None`; a stopped node
+raises an error. The timestamp is the oldest observation in Unix milliseconds.
+The total pool is not a per-request context limit.

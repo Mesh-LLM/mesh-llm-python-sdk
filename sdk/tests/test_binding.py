@@ -66,6 +66,7 @@ class BindingAdmissionTests(unittest.TestCase):
         module = _binding.native()
         handle = module.create_node("client", [], [], False, None, 0, 0)
         calls = [
+            lambda: handle.runtime_capacity("org/model#profile"),
             lambda: handle.mesh_models_json("{}"),
             lambda: handle.mesh_model_json("org/model#profile"),
             lambda: handle.document_ocr(b"%PDF-1.7", '{"model":"ocr"}'),

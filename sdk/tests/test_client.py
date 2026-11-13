@@ -26,6 +26,7 @@ from meshllm import (
     OpenAIRequestError,
     OpenAIStreamChunk,
     OpenAIStreamStarted,
+    LaneCapacity,
 )
 
 
@@ -138,6 +139,23 @@ class FakeHandle:
 
 
 class NodeTests(unittest.IsolatedAsyncioTestCase):
+    async def test_runtime_capacity_preserves_values_none_and_errors(self) -> None:
+        handle = FakeHandle()
+        values = iter([
+            SimpleNamespace(execution_lanes=2, context_tokens_per_lane=4096,
+                            context_pool_tokens=12288, captured_at_unix_ms=123),
+            None,
+        ])
+        handle.runtime_capacity = lambda model: next(values)
+        node = Node(handle)
+        self.assertEqual(await node.runtime_capacity("model-a"), LaneCapacity(2, 4096, 12288, 123))
+        self.assertIsNone(await node.runtime_capacity("model-a"))
+        def stopped(model: str) -> None:
+            raise RuntimeError("node is not running")
+        handle.runtime_capacity = stopped
+        with self.assertRaisesRegex(RuntimeError, "node is not running"):
+            await node.runtime_capacity("model-a")
+
     async def test_full_native_configuration_is_forwarded_without_losing_settings(self) -> None:
         calls = []
         handle = FakeHandle()
